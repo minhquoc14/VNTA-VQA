@@ -39,15 +39,15 @@ dữ liệu: output của `clip_pipeline` (`export/<batch>/*.mp4`) là input c�
 | ① | Thu thập dữ liệu (YouTube/dashcam/CCTV) | [`clip_pipeline/`](./clip_pipeline) |
 | ② | Lọc, ẩn danh (blur biển số/mặt), cắt clip 5–30s | [`clip_pipeline/`](./clip_pipeline) |
 | ③ | Sinh QA nháp bằng VLM (10 nhóm + keyframe ứng viên + answerability nháp) | [`vlm_data_generation/`](./vlm_data_generation) |
-| ④ | Checklist soạn thảo — chuẩn hoá QA nháp, chèn câu not-answerable | *(chưa có trong repo)* |
-| ⑤ | Team A viết Guideline (rubric đúng/sai, tiêu chí keyframe & answerability) | *(chưa có trong repo)* |
+| ④ | Checklist soạn thảo — chuẩn hoá QA nháp, chèn câu not-answerable |  |
+| ⑤ | Team A viết Guideline (rubric đúng/sai, tiêu chí keyframe & answerability) |  |
 | ⑥ | Team B Majority Vote (≥3 người/clip) | *(chưa có trong repo)* |
-| ⑦ | Tính Agreement Rate (% đồng thuận, keyframe IoU, answerability agreement) | *(chưa có trong repo)* |
+| ⑦ | Tính Agreement Rate (% đồng thuận, keyframe IoU, answerability agreement) | |
 | ⑧ | Chốt GT (confirmed / loại bỏ / ambiguous → trục U) | *(chưa có trong repo)* |
-| ⑨ | Xây & validate LLM/VLM Judge (GEPA optimize, Spearman ≥ 0.8) | *(chưa có trong repo)* |
-| ⑩ | Human baseline (blind vs full video) | *(chưa có trong repo)* |
-| ⑪ | Chia Train/Val/Test + báo cáo thống kê | *(chưa có trong repo)* |
-| ⑫ | Thực nghiệm: baseline + proposed method + ablation | *(chưa có trong repo)* |
+| ⑨ | Xây & validate LLM/VLM Judge (GEPA optimize, Spearman ≥ 0.8) |  |
+| ⑩ | Human baseline (blind vs full video) |  |
+| ⑪ | Chia Train/Val/Test + báo cáo thống kê |  |
+| ⑫ | Thực nghiệm: baseline + proposed method + ablation |  |
 
 Các bước ④–⑫ (đánh giá, judge pipeline, phương pháp RL Keyframe Selection +
 Pseudo-CoT Distillation, thực nghiệm) được mô tả chi tiết trong
