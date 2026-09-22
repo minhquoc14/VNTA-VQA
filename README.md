@@ -3,9 +3,6 @@
 **An Evidence-Grounded Open-Ended Video QA Benchmark for Accident Scene
 Understanding in Vietnam**
 
-Khoá luận tốt nghiệp — Trường Đại học Công nghệ Thông tin, ĐHQG-HCM.
-Cán bộ hướng dẫn: TS. Đỗ Trọng Hợp, ThS. Nguyễn Ngọc Quý.
-
 VNTA-VQA là bộ dữ liệu Hỏi-Đáp dạng văn bản tự do (open-ended) trên video
 tai nạn/near-miss giao thông tại Việt Nam. Khác với các benchmark hiện có
 (SUTD-TrafficQA, MM-AU, VRU-Accident, RoadSceneVQA), mỗi cặp QA ở đây được
