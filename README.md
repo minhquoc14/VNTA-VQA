@@ -34,20 +34,20 @@ dữ liệu: output của `clip_pipeline` (`export/<batch>/*.mp4`) là input c�
 
 ## Pipeline gán nhãn end-to-end (12 bước)
 
-| Bước | Tên |
-|---|---|---|
-| ① | Thu thập dữ liệu (YouTube/dashcam/CCTV) | 
-| ② | Lọc, ẩn danh (blur biển số/mặt), cắt clip 5–30s | 
-| ③ | Sinh QA nháp bằng VLM (10 nhóm + keyframe ứng viên + answerability nháp) | 
-| ④ | Checklist soạn thảo — chuẩn hoá QA nháp, chèn câu not-answerable | 
-| ⑤ | Team A viết Guideline (rubric đúng/sai, tiêu chí keyframe & answerability) |  |
-| ⑥ | Team B Majority Vote (≥3 người/clip) | 
-| ⑦ | Tính Agreement Rate (% đồng thuận, keyframe IoU, answerability agreement) | |
-| ⑧ | Chốt GT (confirmed / loại bỏ / ambiguous → trục U) | 
-| ⑨ | Xây & validate LLM/VLM Judge (GEPA optimize, Spearman ≥ 0.8) |  |
-| ⑩ | Human baseline (blind vs full video) |  |
-| ⑪ | Chia Train/Val/Test + báo cáo thống kê |  |
-| ⑫ | Thực nghiệm: baseline + proposed method + ablation |  |
+| Bước | Tên 
+|---|---
+| ① | Thu thập dữ liệu (YouTube/dashcam/CCTV) 
+| ② | Lọc, ẩn danh (blur biển số/mặt), cắt clip 5–30s 
+| ③ | Sinh QA nháp bằng VLM (10 nhóm + keyframe ứng viên + answerability nháp) 
+| ④ | Checklist soạn thảo — chuẩn hoá QA nháp, chèn câu not-answerable  
+| ⑤ | Team A viết Guideline (rubric đúng/sai, tiêu chí keyframe & answerability)
+| ⑥ | Team B Majority Vote (≥3 người/clip)  
+| ⑦ | Tính Agreement Rate (% đồng thuận, keyframe IoU, answerability agreement)
+| ⑧ | Chốt GT (confirmed / loại bỏ / ambiguous → trục U) 
+| ⑨ | Xây & validate LLM/VLM Judge (GEPA optimize, Spearman ≥ 0.8) 
+| ⑩ | Human baseline (blind vs full video)
+| ⑪ | Chia Train/Val/Test + báo cáo thống kê 
+| ⑫ | Thực nghiệm: baseline + proposed method + ablation 
 
 Các bước ④–⑫ (đánh giá, judge pipeline, phương pháp RL Keyframe Selection +
 Pseudo-CoT Distillation, thực nghiệm) được mô tả chi tiết trong
