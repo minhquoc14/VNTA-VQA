@@ -1,0 +1,31 @@
+# --- Python ---
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# --- clip_pipeline runtime state (local data, never committed) ---
+clip_pipeline/work/
+clip_pipeline/export/
+clip_pipeline/logs/
+clip_pipeline/pipeline.db
+clip_pipeline/pipeline.db-wal
+clip_pipeline/pipeline.db-shm
+clip_pipeline/config.json
+clip_pipeline/cookies.txt
+clip_pipeline/cookies.json
+clip_pipeline/cookies.netscape.txt
+
+# --- vlm_data_generation ---
+vlm_data_generation/videos/
+vlm_data_generation/*.json
+!vlm_data_generation/example_output.json
+
+# --- secrets ---
+.env
+*.env
+.ipynb_checkpoints/
+
+# --- OS / editor ---
+.DS_Store
+.vscode/

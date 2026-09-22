@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EG-TrafficQA-VN · Modality Collapse — Visual Explainer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<style>
+  :root{
+    --ink:#0e1526;          /* nền mực sâu */
+    --ink-2:#151d33;        /* panel */
+    --ink-3:#1d2742;        /* panel nổi */
+    --line:#2c3a5c;         /* đường kẻ */
+    --line-soft:#22304e;
+    --text:#e7ecf7;         /* chữ chính */
+    --muted:#9aa8c7;        /* chữ phụ */
+    --dim:#6b7a9e;          /* chữ mờ */
+    --good:#3fd4a0;         /* video-dependent / tốt */
+    --good-dim:#1c4a3d;
+    --bad:#e0607a;          /* shortcut / xấu */
+    --bad-dim:#4a2331;
+    --sig:#f2b45c;          /* tín hiệu / nhấn */
+    --sig-dim:#4a3a1e;
+    --info:#6ea8ff;         /* thông tin / lý thuyết */
+    --info-dim:#22335e;
+    --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
+    --sans:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:
+      radial-gradient(900px 500px at 82% -8%, #17223d 0%, transparent 60%),
+      radial-gradient(700px 480px at 5% 4%, #131b30 0%, transparent 55%),
+      var(--ink);
+    color:var(--text);font-family:var(--sans);line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 120px}
+
+  /* ---- hero ---- */
+  header.hero{padding:76px 24px 40px;max-width:1080px;margin:0 auto}
+  .kicker{font-family:var(--mono);font-size:12.5px;letter-spacing:.02em;color:var(--sig);
+    display:flex;align-items:center;gap:10px;margin-bottom:22px}
+  .kicker .dot{width:7px;height:7px;border-radius:50%;background:var(--sig);
+    box-shadow:0 0 0 4px var(--sig-dim)}
+  h1.title{font-size:clamp(30px,4.6vw,52px);line-height:1.04;margin:0 0 18px;
+    font-weight:800;letter-spacing:-.02em;max-width:16ch}
+  h1.title .tv{color:var(--good)}
+  h1.title .col{color:var(--bad)}
+  .lede{font-size:18px;color:var(--muted);max-width:66ch;margin:0}
+  .lede b{color:var(--text);font-weight:600}
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:30px;
+    font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:8px}
+  .legend i{width:22px;height:8px;border-radius:2px;display:inline-block}
+
+  /* ---- section scaffolding ---- */
+  section{margin-top:64px}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--info);letter-spacing:.04em}
+  h2{font-size:clamp(21px,2.6vw,27px);margin:6px 0 6px;font-weight:700;letter-spacing:-.01em}
+  .sublede{color:var(--muted);max-width:70ch;margin:0 0 26px;font-size:15.5px}
+
+  /* ---- panels ---- */
+  .panel{background:linear-gradient(180deg,var(--ink-2),var(--ink-2)) padding-box;
+    border:1px solid var(--line);border-radius:14px;padding:26px}
+  .panel + .panel{margin-top:18px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+
+  .cap{font-family:var(--mono);font-size:12px;color:var(--dim);margin-bottom:14px;
+    display:flex;align-items:center;gap:9px}
+  .cap .fig{color:var(--sig)}
+
+  /* mermaid host */
+  .mer{background:var(--ink);border:1px solid var(--line-soft);border-radius:11px;
+    padding:16px;overflow-x:auto}
+  .mermaid{display:flex;justify-content:center}
+
+  /* formula chip */
+  .fx{font-family:var(--mono);background:var(--ink);border:1px solid var(--line-soft);
+    border-left:3px solid var(--info);border-radius:8px;padding:13px 15px;color:#dfe7fb;
+    font-size:14px;overflow-x:auto;white-space:nowrap}
+  .fx.good{border-left-color:var(--good)}
+  .fx.bad{border-left-color:var(--bad)}
+  .fx.sig{border-left-color:var(--sig)}
+  .fx em{color:var(--muted);font-style:normal}
+
+  .note{font-size:14px;color:var(--muted);margin-top:14px}
+  .note b{color:var(--text)}
+
+  /* tags */
+  .tag{display:inline-block;font-family:var(--mono);font-size:11.5px;padding:2px 9px;
+    border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+  .tag.good{color:var(--good);border-color:var(--good-dim);background:#12241d}
+  .tag.bad{color:var(--bad);border-color:var(--bad-dim);background:#241419}
+  .tag.sig{color:var(--sig);border-color:var(--sig-dim);background:#241d10}
+  .tag.info{color:var(--info);border-color:var(--info-dim);background:#111d38}
+
+  /* three-tier ladder */
+  .ladder{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  @media(max-width:760px){.ladder{grid-template-columns:1fr}}
+  .tier{border:1px solid var(--line);border-radius:12px;padding:18px;background:var(--ink-2);
+    position:relative;overflow:hidden}
+  .tier h4{margin:0 0 4px;font-size:15px}
+  .tier .lvl{font-family:var(--mono);font-size:11.5px;color:var(--dim)}
+  .tier .meat{font-family:var(--mono);font-size:12.5px;color:#cdd8f2;margin:12px 0;
+    background:var(--ink);border:1px solid var(--line-soft);border-radius:7px;padding:9px 10px}
+  .pmz{font-size:12.5px;color:var(--muted);margin:3px 0}
+  .pmz.pro::before{content:"+ ";color:var(--good);font-family:var(--mono)}
+  .pmz.con::before{content:"– ";color:var(--bad);font-family:var(--mono)}
+  .tier .edge{position:absolute;top:0;left:0;height:3px;width:100%}
+  .t1 .edge{background:var(--sig)} .t2 .edge{background:var(--good)} .t3 .edge{background:var(--info)}
+
+  /* AB compare rows */
+  .rowcmp{display:grid;grid-template-columns:70px 1fr 1fr 90px;gap:12px;align-items:center;
+    font-size:13.5px;padding:12px 0;border-bottom:1px solid var(--line-soft)}
+  .rowcmp:last-child{border-bottom:none}
+  .rowcmp .lbl{font-family:var(--mono);color:var(--muted)}
+  .bar{height:26px;border-radius:5px;background:var(--ink);border:1px solid var(--line-soft);
+    position:relative;overflow:hidden}
+  .bar>i{position:absolute;top:0;left:0;bottom:0;display:block}
+  .bar>span{position:absolute;right:8px;top:50%;transform:translateY(-50%);
+    font-family:var(--mono);font-size:11.5px;color:#dfe7fb}
+  .verdict{font-family:var(--mono);font-size:12px;text-align:right}
+
+  /* scatter */
+  .scatterwrap{display:grid;grid-template-columns:1.35fr 1fr;gap:22px;align-items:center}
+  @media(max-width:820px){.scatterwrap{grid-template-columns:1fr}}
+  .readout li{margin-bottom:11px;font-size:14px;color:var(--muted)}
+  .readout li b{color:var(--text)}
+  .swatch{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;vertical-align:middle}
+
+  /* KL bars */
+  .distrib{font-family:var(--mono);font-size:12px}
+  .distrib .drow{display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:center;margin:7px 0}
+  .distrib .dlab{color:var(--muted)}
+  .dbar{height:16px;border-radius:3px;display:flex;gap:3px;align-items:flex-end}
+  .dbar b{display:block;border-radius:2px}
+
+  /* priority table */
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  thead th{text-align:left;font-family:var(--mono);font-size:11.5px;color:var(--dim);
+    font-weight:500;padding:10px 12px;border-bottom:1px solid var(--line)}
+  tbody td{padding:12px;border-bottom:1px solid var(--line-soft);vertical-align:top;color:var(--muted)}
+  tbody tr td:first-child{color:var(--text);font-family:var(--mono);font-size:12.5px}
+  tbody td b{color:var(--text)}
+  .stars{color:var(--sig);letter-spacing:1px;font-size:12px}
+  .prio{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:6px;white-space:nowrap}
+  .p0{background:#12241d;color:var(--good);border:1px solid var(--good-dim)}
+  .p1{background:#241d10;color:var(--sig);border:1px solid var(--sig-dim)}
+  .p2{background:#111d38;color:var(--info);border:1px solid var(--info-dim)}
+  .p3{background:var(--ink);color:var(--dim);border:1px solid var(--line)}
+
+  /* mcnemar 2x2 */
+  .mn{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;font-family:var(--mono);font-size:13px;max-width:440px}
+  .mn .cell{border:1px solid var(--line);border-radius:8px;padding:14px;text-align:center;background:var(--ink)}
+  .mn .hd{color:var(--dim);border:none;background:none;display:flex;align-items:center;justify-content:center;font-size:12px}
+  .mn .cc{color:var(--good);border-color:var(--good-dim)}
+  .mn .cb{color:var(--bad);border-color:var(--bad-dim)}
+  .mn .big{font-size:22px;display:block;margin-bottom:3px}
+
+  footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--line);
+    color:var(--dim);font-size:13px}
+  footer b{color:var(--muted)}
+  a{color:var(--info);text-decoration:none}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="kicker"><span class="dot"></span>EG-TrafficQA-VN · SỔ TAY HÌNH VẼ</div>
+  <h1 class="title">Đo khi nào video <span class="tv">thực sự</span> quyết định câu trả lời — không phải khi model <span class="col">đoán mò</span></h1>
+  <p class="lede">Modality collapse là hiện tượng model trả lời đúng mà <b>không dùng video</b>. Sổ tay này gom mọi thước đo — từ Δ-accuracy thô đến giới hạn thông tin — về <b>một đại lượng gốc duy nhất</b>: lượng thông tin video đóng góp cho đáp án.</p>
+
+  <div class="legend">
+    <span><i style="background:var(--good)"></i>video-dependent / tốt</span>
+    <span><i style="background:var(--bad)"></i>shortcut / collapse</span>
+    <span><i style="background:var(--sig)"></i>tín hiệu · điểm nhấn</span>
+    <span><i style="background:var(--info)"></i>nền lý thuyết thông tin</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ===== SECTION 1 — three tiers ===== -->
+  <section id="tiers">
+    <div class="snum">01 — BỐI CẢNH</div>
+    <h2>Ba tầng đo, từ thô đến tinh</h2>
+    <p class="sublede">Δ-accuracy không sai — nó chỉ là bản <b>bị lượng-tử-hoá</b> của thứ sâu hơn. Cả ba tầng đo cùng một thứ: video đóng góp bao nhiêu.</p>
+
+    <div class="ladder">
+      <div class="tier t1"><div class="edge"></div>
+        <div class="lvl">TẦNG 1 · ACCURACY</div>
+        <h4>Δ = acc<sub>full</sub> − acc<sub>blind</sub></h4>
+        <div class="meat">Visual Gain · Blind Gap</div>
+        <div class="pmz pro">rẻ, ai cũng hiểu</div>
+        <div class="pmz con">thô — nhị phân đúng/sai</div>
+        <div class="pmz con">mất thông tin ở vùng biên</div>
+      </div>
+      <div class="tier t2"><div class="edge"></div>
+        <div class="lvl">TẦNG 2 · XÁC SUẤT</div>
+        <h4>KL / JS( P<sub>video</sub> ‖ P<sub>blind</sub> )</h4>
+        <div class="meat">per-sample · có dấu</div>
+        <div class="pmz pro">nhạy, lọc được từng câu</div>
+        <div class="pmz pro">dùng mọi bit thông tin</div>
+        <div class="pmz con">cần logit / xác suất</div>
+      </div>
+      <div class="tier t3"><div class="edge"></div>
+        <div class="lvl">TẦNG 3 · THÔNG TIN</div>
+        <h4>I( A ; Video | Q )</h4>
+        <div class="meat">Fano upper-bound</div>
+        <div class="pmz pro">đúng bản chất nhất</div>
+        <div class="pmz pro">cho ra chặn trên thật</div>
+        <div class="pmz con">đắt, cần nhiều mẫu</div>
+      </div>
+    </div>
+    <p class="note"><b>Ý cốt lõi:</b> Δ-accuracy là Tầng-2/3 bị nhị-phân-hoá tại ngưỡng quyết định 0.5. Nên câu "sao Δ này đủ?" <b>không thể trả lời bằng chính Δ</b> — phải leo lên Tầng 2 hoặc 3.</p>
+  </section>
+
+  <!-- ===== SECTION 2 — shortcut score ===== -->
+  <section id="shortcut">
+    <div class="snum">02 — ĐỊNH NGHĨA</div>
+    <h2>Shortcut Score: text giải được, trừ đi video cần đến</h2>
+    <p class="sublede">Điểm ở mức từng câu hỏi. Cao = đi tắt bằng ngôn ngữ → loại/sửa. Thấp = thật sự cần nhìn video → giữ.</p>
+
+    <div class="grid2">
+      <div class="panel">
+        <div class="cap"><span class="fig">HÌNH 2A</span> · phân rã công thức</div>
+        <div class="fx sig">S(q) = T(q) − V(q)</div>
+        <p class="note" style="margin-top:16px">
+          <span class="tag bad">T(q)</span> Textual Evidence — LLM text-only trả lời <b>đúng và tự tin</b> đến đâu (trọng số entropy: càng tự tin, shortcut càng mạnh).
+        </p>
+        <p class="note">
+          <span class="tag good">V(q)</span> Visual Necessity — thêm video <b>kéo xác suất về đáp án đúng</b> bao nhiêu, trung bình trên panel VLM.
+        </p>
+        <div class="fx good" style="margin-top:12px">V(q) ∝ P(y*│video,q) − P(y*│blind,q)</div>
+      </div>
+
+      <div class="panel">
+        <div class="cap"><span class="fig">HÌNH 2B</span> · vì sao Δ nhị phân làm mất thông tin</div>
+        <div class="rowcmp">
+          <span class="lbl">Câu A</span>
+          <div class="bar"><i style="width:26%;background:var(--bad-dim)"></i><span>blind .26</span></div>
+          <div class="bar"><i style="width:95%;background:var(--good)"></i><span>video .95</span></div>
+          <div class="verdict" style="color:var(--good)">GIỮ</div>
+        </div>
+        <div class="rowcmp">
+          <span class="lbl">Câu B</span>
+          <div class="bar"><i style="width:94%;background:var(--sig-dim)"></i><span>blind .94</span></div>
+          <div class="bar"><i style="width:95%;background:var(--good)"></i><span>video .95</span></div>
+          <div class="verdict" style="color:var(--bad)">LOẠI</div>
+        </div>
+        <p class="note" style="margin-top:16px"><b>Δ-accuracy nhìn A và B giống hệt nhau</b> (cả hai "đúng ở cả hai điều kiện"). Chỉ điểm liên tục trên xác suất mới thấy: A được video cứu, B thì video vô dụng.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 3 — BG x VG map ===== -->
+  <section id="map">
+    <div class="snum">03 — BẢN ĐỒ</div>
+    <h2>Không gian Blind-Gap × Visual-Gain</h2>
+    <p class="sublede">Mỗi benchmark là một điểm. Mục tiêu của EG-TrafficQA-VN: kéo điểm về <span style="color:var(--good)">góc trên-trái</span> — video hữu ích (VG cao) mà text không giải được (BG thấp).</p>
+
+    <div class="panel">
+      <div class="cap"><span class="fig">HÌNH 4</span> · signature plot (số minh hoạ theo Korkut et al. 2026)</div>
+      <div class="scatterwrap">
+        <svg viewBox="0 0 520 400" width="100%" role="img" aria-label="Bản đồ Blind Gap và Visual Gain">
+          <defs>
+            <linearGradient id="goodzone" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#173a2e" stop-opacity="0.9"/>
+              <stop offset="1" stop-color="#173a2e" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- good zone highlight (top-left) -->
+          <rect x="60" y="40" width="150" height="120" fill="url(#goodzone)" rx="10"/>
+          <!-- axes -->
+          <line x1="60" y1="360" x2="500" y2="360" stroke="#2c3a5c" stroke-width="1.5"/>
+          <line x1="60" y1="40" x2="60" y2="360" stroke="#2c3a5c" stroke-width="1.5"/>
+          <!-- zero line for VG -->
+          <line x1="60" y1="230" x2="500" y2="230" stroke-dasharray="4 5" stroke="#33436a" stroke-width="1"/>
+          <text x="66" y="224" fill="#6b7a9e" font-family="IBM Plex Mono" font-size="11">VG = 0</text>
+          <!-- axis labels -->
+          <text x="280" y="392" fill="#9aa8c7" font-family="IBM Plex Mono" font-size="12" text-anchor="middle">Blind Gap  →  (text-only solvability, cao = xấu)</text>
+          <text x="20" y="200" fill="#9aa8c7" font-family="IBM Plex Mono" font-size="12" text-anchor="middle" transform="rotate(-90 20 200)">Visual Gain  →  (video hữu ích)</text>
+
+          <!-- points: x = 60 + BG*scale ; y = 230 - VG*scale -->
+          <!-- TrafficQA: BG low ~6, VG ~+12 => good -->
+          <g>
+            <circle cx="105" cy="150" r="13" fill="#3fd4a0"/>
+            <text x="105" y="128" fill="#d7f5e9" font-family="Inter" font-size="12" text-anchor="middle" font-weight="600">TrafficQA</text>
+            <text x="105" y="118" fill="#5f7f74" font-family="IBM Plex Mono" font-size="9" text-anchor="middle">target</text>
+          </g>
+          <!-- VRU-Accident: BG high ~22, VG ~+16 -->
+          <g>
+            <circle cx="330" cy="115" r="15" fill="none" stroke="#c9d3ea" stroke-width="2" stroke-dasharray="3 3"/>
+            <text x="330" y="94" fill="#c9d3ea" font-family="Inter" font-size="12" text-anchor="middle" font-weight="600">VRU-Accident</text>
+            <text x="330" y="140" fill="#9aa8c7" font-family="IBM Plex Mono" font-size="9" text-anchor="middle">VG cao · BG cũng cao</text>
+          </g>
+          <!-- AccidentBench: BG low ~5, VG small +3 -->
+          <g>
+            <circle cx="95" cy="215" r="10" fill="#6ea8ff" opacity="0.85"/>
+            <text x="95" y="243" fill="#9fc0ff" font-family="Inter" font-size="11" text-anchor="middle">AccidentBench</text>
+          </g>
+          <!-- MM-AU: BG high ~40, VG negative -->
+          <g>
+            <circle cx="470" cy="300" r="14" fill="#e0607a"/>
+            <text x="440" y="325" fill="#f0aebb" font-family="Inter" font-size="12" text-anchor="middle" font-weight="600">MM-AU</text>
+            <line x1="470" y1="292" x2="470" y2="308" stroke="#0e1526" stroke-width="2"/>
+            <line x1="462" y1="300" x2="478" y2="300" stroke="#0e1526" stroke-width="2"/>
+          </g>
+          <text x="135" y="60" fill="#3fd4a0" font-family="IBM Plex Mono" font-size="11" font-weight="600">★ VÙNG TỐT</text>
+        </svg>
+
+        <ul class="readout">
+          <li><span class="swatch" style="background:var(--good)"></span><b>TrafficQA</b> — BG thấp, VG dương ổn định. Chuẩn "grounded" cần nhắm tới.</li>
+          <li><span class="swatch" style="background:#c9d3ea"></span><b>VRU-Accident</b> — VG lớn nhưng BG vẫn cao: có tín hiệu thị giác, song còn giải được bằng text.</li>
+          <li><span class="swatch" style="background:var(--info)"></span><b>AccidentBench</b> — BG thấp nhưng VG khiêm tốn.</li>
+          <li><span class="swatch" style="background:var(--bad)"></span><b>MM-AU</b> — BG rất cao, VG <b>âm</b>: thêm video còn làm tệ hơn. Collapse điển hình.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 4 — KL / JS ===== -->
+  <section id="kl">
+    <div class="snum">04 — XÁC SUẤT</div>
+    <h2>KL / JS: đo độ dịch chuyển niềm tin — nhưng phải gắn dấu</h2>
+    <p class="sublede">Ý tưởng KL của em đúng hướng. Ba chốt bắt buộc: dùng Jensen–Shannon (chuẩn hoá [0,1]), gắn dấu theo hướng đáp án đúng, và lấy xác suất trên token option.</p>
+
+    <div class="grid2">
+      <div class="panel">
+        <div class="cap"><span class="fig">HÌNH 5A</span> · video dồn niềm tin về đâu</div>
+        <div class="distrib">
+          <div class="drow"><span class="dlab">P<sub>blind</sub></span>
+            <div class="dbar">
+              <b style="width:14%;height:9px;background:#33436a"></b>
+              <b style="width:40%;height:16px;background:#33436a"></b>
+              <b style="width:14%;height:9px;background:#33436a"></b>
+              <b style="width:9%;height:6px;background:#33436a"></b>
+              <b style="width:9%;height:6px;background:#33436a"></b>
+            </div>
+          </div>
+          <div class="drow"><span class="dlab">P<sub>video</sub></span>
+            <div class="dbar">
+              <b style="width:9%;height:6px;background:#1c4a3d"></b>
+              <b style="width:9%;height:6px;background:#1c4a3d"></b>
+              <b style="width:60%;height:20px;background:#3fd4a0"></b>
+              <b style="width:9%;height:6px;background:#1c4a3d"></b>
+              <b style="width:9%;height:6px;background:#1c4a3d"></b>
+            </div>
+          </div>
+          <div class="drow"><span class="dlab" style="color:var(--dim)">option</span>
+            <div class="dbar" style="color:var(--dim);font-size:11px;justify-content:space-between;padding-top:4px">
+              <span>A</span><span>B</span><span style="color:var(--good)">C ✓</span><span>D</span><span>E</span>
+            </div>
+          </div>
+        </div>
+        <p class="note" style="margin-top:14px">Blind đoán mò về B (prior ngôn ngữ). Video dồn khối lượng về C — <b>KL/JS lớn = video "nói điều mới"</b>.</p>
+      </div>
+
+      <div class="panel">
+        <div class="cap"><span class="fig">HÌNH 5B</span> · cái bẫy & cách vá</div>
+        <div class="fx bad">KL lớn ⇏ video ĐÚNG hướng</div>
+        <p class="note" style="margin-top:14px">Video kéo niềm tin <b>ra khỏi</b> đáp án đúng cũng cho KL lớn — đó là video <span style="color:var(--bad)">có hại</span>, không phải hữu ích. KL trần bị mù hướng.</p>
+        <div class="cap" style="margin:18px 0 10px"><span class="fig">METRIC MỚI</span> · gộp hướng + độ lớn</div>
+        <div class="fx sig">SignedVideoGain(q) = sign( ΔP(y*) ) · JS<sub>norm</sub>(q)</div>
+        <p class="note" style="margin-top:12px"><span class="tag sig">dấu</span> từ Δ xác suất-đúng &nbsp; <span class="tag info">độ lớn</span> từ Jensen–Shannon ∈ [0,1]. Vừa không mất thông tin như Δ nhị phân, vừa không mù hướng như KL trần.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 5 — projection tree ===== -->
+  <section id="proj">
+    <div class="snum">05 — LÝ THUYẾT · CHẶN TRÊN</div>
+    <h2>Mọi metric là hình chiếu của một đại lượng</h2>
+    <p class="sublede">Đây là hình mạnh nhất cho paper: trình bày được nó, thầy khó vặn "sao chọn metric này". Chặn trên của Visual Gain đến thẳng từ bất đẳng thức Fano.</p>
+
+    <div class="panel">
+      <div class="cap"><span class="fig">HÌNH 6</span> · sơ đồ chiếu I(A;Video│Q)</div>
+      <div class="mer">
+        <pre class="mermaid">
+flowchart TD
+    HQ["H(A│Q)<br/><small>bất định khi CHỈ có câu hỏi · từ P_blind</small>"]
+    HQV["H(A│Q,Video)<br/><small>bất định khi có video · từ P_video</small>"]
+    I["I(A ; Video │ Q)<br/><b>THÔNG TIN VIDEO ĐÓNG GÓP</b><br/><small>đại lượng gốc</small>"]
+    F["Chặn trên Visual Gain<br/><small>VG_max ≲ I / log(K−1)</small>"]
+    D["Δ-accuracy / Visual Gain<br/><small>Tầng 1 · thô</small>"]
+    S["SignedVideoGain = sign·JS<br/><small>Tầng 2 · mịn · metric mới</small>"]
+
+    HQ -- "trừ" --> I
+    HQV -- "trừ" --> I
+    I -- "chia log(K−1), Fano" --> F
+    I -- "nhị phân hoá tại 0.5" --> D
+    I -- "per-sample, có dấu" --> S
+
+    classDef root fill:#22335e,stroke:#6ea8ff,color:#e7ecf7,stroke-width:1.5px;
+    classDef src fill:#151d33,stroke:#2c3a5c,color:#cdd8f2;
+    classDef good fill:#12241d,stroke:#1c4a3d,color:#3fd4a0;
+    classDef sig fill:#241d10,stroke:#4a3a1e,color:#f2b45c;
+    class I root; class HQ,HQV src; class F,S good; class D sig;
+        </pre>
+      </div>
+      <p class="note"><b>Hệ quả dùng được ngay:</b> câu nào H(A│Q) đã thấp (option lộ đáp án) thì trần đóng góp video thấp → dù model xịn đến đâu VG cũng không cao → <b>phải sửa ở khâu sinh câu hỏi, không cứu được ở khâu đo cuối.</b></p>
+      <div class="grid2" style="margin-top:8px">
+        <div class="fx info">Î(A;Video│Q) ≈ mean<sub>q</sub>[ H(P<sub>blind</sub>) − H(P<sub>video</sub>) ] &nbsp;<em>— ước lượng bằng Information Gain, tái dùng phân phối §04</em></div>
+        <div class="fx good">VG<sub>max</sub> ≲ I(A;Video│Q) / log(K−1) &nbsp;<em>— chặn trên qua Fano</em></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 6 — McNemar ===== -->
+  <section id="mcnemar">
+    <div class="snum">06 — THỐNG KÊ</div>
+    <h2>McNemar: trả lời thẳng "sao biết Δ này đủ"</h2>
+    <p class="sublede">Đừng neo vào một Δ cố định. Neo vào: đóng góp của video có <b>vượt nhiễu lấy mẫu</b> không.</p>
+
+    <div class="grid2">
+      <div class="panel">
+        <div class="cap"><span class="fig">HÌNH 8</span> · bảng ghép cặp 2×2</div>
+        <div class="mn">
+          <div class="cell hd"></div>
+          <div class="cell hd">video ĐÚNG</div>
+          <div class="cell hd">video SAI</div>
+          <div class="cell hd" style="writing-mode:horizontal-tb">blind ĐÚNG</div>
+          <div class="cell"><b class="big">a</b>cùng đúng</div>
+          <div class="cell cb"><b class="big">b</b>video làm hỏng</div>
+          <div class="cell hd">blind SAI</div>
+          <div class="cell cc"><b class="big">c</b>video cứu được</div>
+          <div class="cell"><b class="big">d</b>cùng sai</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="cap"><span class="fig">KIỂM ĐỊNH</span> · χ² trên (b, c)</div>
+        <div class="fx" style="border-left-color:var(--good)">χ² = (b − c)² / (b + c) &nbsp; ~ χ²(1)</div>
+        <p class="note" style="margin-top:16px">Nếu video vô dụng thì b, c phải đối xứng. Khi <b style="color:var(--good)">c ≫ b</b> (video cứu nhiều hơn phá) và <b>p &lt; 0.05</b> → đóng góp video <b>có ý nghĩa thống kê</b>, không phải may rủi.</p>
+        <p class="note"><b>Câu trả lời cho thầy:</b> "Em không khẳng định một Δ cố định là đủ. Em bác bỏ giả thuyết đối xứng b=c ở mức p&lt;0.05 — nghĩa là đóng góp của video vượt nhiễu lấy mẫu."</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 7 — priority table ===== -->
+  <section id="priority">
+    <div class="snum">07 — KẾ HOẠCH</div>
+    <h2>Thứ tự thực nghiệm</h2>
+    <p class="sublede">Làm từ trên xuống. Mỗi bước là superset thông tin của bước trước nên không phí công.</p>
+    <div class="panel" style="padding:8px 8px 4px">
+      <table>
+        <thead><tr><th>Metric / TN</th><th>Trả lời câu hỏi nào</th><th>Khả thi</th><th>Ưu tiên</th></tr></thead>
+        <tbody>
+          <tr><td>BG &amp; VG (dataset)</td><td>Benchmark của em nằm ở đâu trên bản đồ collapse</td><td><span class="stars">★★★★★</span></td><td><span class="prio p0">P0 · ngay</span></td></tr>
+          <tr><td>McNemar test</td><td>Đóng góp video có ý nghĩa thống kê không</td><td><span class="stars">★★★★★</span></td><td><span class="prio p0">P0</span></td></tr>
+          <tr><td>SignedVideoGain</td><td>Lọc câu nào, giữ câu nào (thay Δ nhị phân)</td><td><span class="stars">★★★★</span></td><td><span class="prio p1">P1</span></td></tr>
+          <tr><td>Shortcut Score S(q)</td><td>Điểm shortcut từng câu, có baseline paper</td><td><span class="stars">★★★★</span></td><td><span class="prio p1">P1</span></td></tr>
+          <tr><td>Information Gain</td><td>Video đóng góp bao nhiêu <b>bit</b> thông tin</td><td><span class="stars">★★★★</span></td><td><span class="prio p2">P2</span></td></tr>
+          <tr><td>Fano upper-bound</td><td>Chặn trên &amp; câu nào bản chất không cứu được</td><td><span class="stars">★★★</span></td><td><span class="prio p2">P2</span></td></tr>
+          <tr><td>Calibration / ECE</td><td>Model có "biết mình không biết" (trục U)</td><td><span class="stars">★★★</span></td><td><span class="prio p3">P3</span></td></tr>
+          <tr><td>Human ceiling</td><td>Trần thật: khó vì thiếu video vs khó vì mơ hồ</td><td><span class="stars">★★</span></td><td><span class="prio p3">P3</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 8 — pipeline ===== -->
+  <section id="pipeline">
+    <div class="snum">08 — QUY TRÌNH</div>
+    <h2>Pipeline chuẩn: hai cổng chống collapse</h2>
+    <p class="sublede">Thay đổi lớn nhất so với luồng gốc: "evaluation collapse" <b>không phải một bước cuối</b> — nó là hai cổng tách rời. Chặn trước ở khâu sinh rẻ hơn nhiều so với sửa ở khâu cuối.</p>
+
+    <div class="panel">
+      <div class="cap"><span class="fig">HÌNH 7</span> · ingestion → evaluation, gắn metric ở từng chốt</div>
+      <div class="mer">
+        <pre class="mermaid">
+flowchart TD
+    A["1 · INGESTION<br/><small>crawl video</small>"] --> B["2 · PROCESSING<br/><small>trim · dedup · anonymize · đa dạng scene</small>"]
+    B --> C["3 · QA GENERATION<br/><small>VLM draft QA + distractor</small>"]
+    C --> GA{{"GATE A — CHẶN TRƯỚC (creation-side)<br/><small>kiểm H(A│Q) không quá thấp · cân bằng đáp án<br/>ép câu counterfactual · chèn 'Cannot be determined'</small>"}}
+    GA --> D["5 · HUMAN ANNOTATE<br/><small>evidence keyframe + answerability · 2 annotators</small>"]
+    D --> E{"6 · IAA GATE<br/>Cohen/Fleiss κ ≥ 0.6"}
+    E -- "κ < 0.6 ↻" --> D
+    E -- "κ ≥ 0.6 ✓" --> GB{{"GATE B — CHẶN SAU (auditing-side)<br/><small>P0 VG·BG·McNemar · P1 SignedVideoGain·S(q) · P2 InfoGain·Fano</small>"}}
+    GB -- "giữ grounded" --> P["8 · SPLIT &amp; PACKAGE<br/><small>train/val/test + báo cáo Δ(BG,VG) trước/sau lọc ★</small>"]
+    GB -- "shortcut-prone" --> R["8' · EDIT / REGENERATE<br/><small>sửa distractor/option</small>"]
+    R -. "quay lại GATE A" .-> GA
+
+    classDef flow fill:#151d33,stroke:#2c3a5c,color:#e7ecf7;
+    classDef gateA fill:#241d10,stroke:#f2b45c,color:#f2b45c,stroke-width:1.5px;
+    classDef gateB fill:#111d38,stroke:#6ea8ff,color:#9fc0ff,stroke-width:1.5px;
+    classDef qc fill:#151d33,stroke:#3fd4a0,color:#3fd4a0;
+    classDef pack fill:#12241d,stroke:#1c4a3d,color:#3fd4a0;
+    classDef edit fill:#241419,stroke:#4a2331,color:#e0607a;
+    class A,B,C,D flow; class GA gateA; class GB gateB; class E qc; class P pack; class R edit;
+        </pre>
+      </div>
+      <div class="grid2" style="margin-top:6px">
+        <p class="note"><span class="tag sig">GATE A ≠ GATE B</span> GATE A đo <b>thông tin câu hỏi</b> (phòng bệnh, rẻ). GATE B đo <b>model có cần video</b> (chữa bệnh).</p>
+        <p class="note"><span class="tag good">IAA ≠ collapse-audit</span> κ đo <b>người</b> đồng ý nhau (chất lượng nhãn). Một câu κ cao vẫn có thể shortcut-prone.</p>
+      </div>
+      <p class="note"><b>Con số vàng cho paper:</b> "sau khi lọc bằng SignedVideoGain/S(q), BG giảm X→Y và VG tăng Z→W" — đúng dạng bảng kết quả của Korkut et al. Đó là bằng chứng định lượng, không phải khẳng định suông.</p>
+    </div>
+  </section>
+
+  <footer>
+    <b>Nguồn.</b> Shortcut Score · T(q) · V(q) · Blind Gap · Visual Gain · bản đồ BG–VG · τ=0.1 — Korkut, Bravo Sarmiento, Kim, Akata, <em>From Accuracy to Visual Dependence: Auditing and Filtering Modality Collapse in Traffic VideoQA</em>, CTB@ICML 2026 (arXiv:2606.30220). &nbsp; Fano · mutual information có điều kiện · Jensen–Shannon — chuẩn lý thuyết thông tin (Cover &amp; Thomas). &nbsp; McNemar — chuẩn thống kê so sánh classifier ghép cặp. &nbsp; VRU-Accident — Kim, Abdelrahman, Abdel-Aty, ICCV 2025 (arXiv:2507.09815).
+  </footer>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad:true,
+    theme:'base',
+    themeVariables:{
+      fontFamily:"IBM Plex Mono, monospace",
+      fontSize:"13px",
+      lineColor:"#43567f",
+      primaryColor:"#151d33",
+      primaryTextColor:"#e7ecf7",
+      primaryBorderColor:"#2c3a5c",
+      tertiaryColor:"#0e1526",
+      clusterBkg:"#0e1526"
+    },
+    flowchart:{curve:'basis',padding:14,nodeSpacing:44,rankSpacing:52}
+  });
+</script>
+</body>
+</html>

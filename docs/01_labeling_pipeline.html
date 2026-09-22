@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Labeling Pipeline — EG-TrafficQA-VN</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#fbf9f3; --ink:#1f2430; --blue:#1e5fbf; --green:#1f8a4c;
+    --red:#c0392b; --orange:#e07b1a; --purple:#7b3ea8; --line:#d8d2c4;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;line-height:1.5;
+    background-image:linear-gradient(90deg,rgba(30,95,191,.04) 1px,transparent 1px),
+      linear-gradient(rgba(30,95,191,.04) 1px,transparent 1px);
+    background-size:28px 28px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 22px 60px}
+  h1{color:var(--blue);font-size:30px;margin:0 0 4px;letter-spacing:.3px}
+  .sub{color:#5c6270;font-size:15px;margin:0 0 26px}
+  h2{color:var(--green);font-size:19px;margin:34px 0 12px;
+    border-bottom:2px solid var(--green);display:inline-block;padding-bottom:2px}
+  .flow{background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.05);margin:8px 0 22px;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;
+    overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.05);font-size:14px}
+  th{background:var(--blue);color:#fff;text-align:left;padding:9px 12px;font-weight:600}
+  td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+  tr:nth-child(even) td{background:#faf8f2}
+  .num{font-weight:700;color:var(--blue)}
+  .callouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:8px 0 8px}
+  .c{border-radius:12px;padding:12px 14px;font-size:13.5px;border:1px dashed}
+  .c b{display:block;margin-bottom:3px;font-size:13px;text-transform:uppercase;letter-spacing:.4px}
+  .c.blue{border-color:var(--blue);background:rgba(30,95,191,.06)} .c.blue b{color:var(--blue)}
+  .c.orange{border-color:var(--orange);background:rgba(224,123,26,.07)} .c.orange b{color:var(--orange)}
+  .c.purple{border-color:var(--purple);background:rgba(123,62,168,.06)} .c.purple b{color:var(--purple)}
+  .c.green{border-color:var(--green);background:rgba(31,138,76,.06)} .c.green b{color:var(--green)}
+  .datapath{font-family:ui-monospace,monospace;background:#fff;border:1px solid var(--line);
+    border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.9;margin-top:6px}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:12px;font-weight:600}
+  .raw{background:#eee;color:#555} .draft{background:rgba(123,62,168,.15);color:var(--purple)}
+  .gt{background:rgba(31,138,76,.15);color:var(--green)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>① Labeling Pipeline — 8 bước</h1>
+  <p class="sub">Đóng góp A · biến video thô YouTube → bộ VQA chất lượng cao · EG-TrafficQA-VN</p>
+
+  <h2>Sơ đồ quy trình</h2>
+  <div class="flow">
+  <pre class="mermaid">
+flowchart TD
+    A["① Collect &amp; Ingest<br/><small>Tải video YouTube / nguồn khác</small>"] --> B["② Filter &amp; Dedup<br/><small>Giữ VN scene · đủ chất lượng · bỏ trùng</small>"]
+    B --> C["③ Anonymize<br/><small>Blur mặt + biển số · quyền riêng tư</small>"]
+    C --> D["④ Auto Pre-label<br/><small>YOLO detect + VLM sinh QA draft</small>"]
+    D --> E["⑤ Human Annotate<br/><small>2 annotators sửa/bổ sung theo evidence</small>"]
+    E --> F["⑥ Adjudicate &amp; Legal<br/><small>Người thứ 3 phân xử + check luật GT</small>"]
+    F --> G{"⑦ QC Gate<br/>IAA κ ≥ 0.6 ?"}
+    G -- "No ↻ gán lại" --> E
+    G -- "Yes ✓" --> H["⑧ Split &amp; Package<br/><small>Train / Val / Test</small>"]
+    classDef prob fill:#fdecea,stroke:#c0392b,color:#7d241a;
+    classDef ok fill:#eaf7ef,stroke:#1f8a4c,color:#155e34;
+    classDef auto fill:#eef4fd,stroke:#1e5fbf,color:#123f80;
+    class D auto; class G prob; class H ok;
+  </pre>
+  </div>
+
+  <h2>Chi tiết từng bước</h2>
+  <table>
+    <tr><th>#</th><th>Bước</th><th>Mô tả</th><th>Vai trò</th></tr>
+    <tr><td class="num">1</td><td>Collect &amp; Ingest</td><td>Tải video từ YouTube (và nguồn khác) về hệ thống trung tâm</td><td>Nguồn dữ liệu</td></tr>
+    <tr><td class="num">2</td><td>Filter &amp; Dedup</td><td>Chỉ giữ <b>VN scene</b>, chất lượng đủ tốt, loại video trùng lặp</td><td>Distribution + chất lượng</td></tr>
+    <tr><td class="num">3</td><td>Anonymize</td><td><b>Blur khuôn mặt + biển số</b> người tham gia giao thông</td><td>Tuân thủ quyền riêng tư</td></tr>
+    <tr><td class="num">4</td><td>Auto Pre-label</td><td><b>YOLO</b> phát hiện xe/người + <b>VLM</b> sinh cặp QA <i>draft</i></td><td>High recall · giảm công người</td></tr>
+    <tr><td class="num">5</td><td>Human Annotate</td><td><b>2 annotators</b> kiểm tra/sửa/bổ sung, dựa trên <b>evidence</b> trong video</td><td>Quality control · tạo GT</td></tr>
+    <tr><td class="num">6</td><td>Adjudicate &amp; Legal</td><td>Bất đồng → <b>người thứ 3</b> phân xử; kiểm tra hợp lệ theo quy tắc giao thông</td><td>Xử lý mâu thuẫn + pháp lý</td></tr>
+    <tr><td class="num">7</td><td>QC Gate</td><td>Đo <b>IAA</b>; chỉ đạt khi <b>κ ≥ 0.6</b> (Kappa)</td><td>Cổng chất lượng bắt buộc</td></tr>
+    <tr><td class="num">8</td><td>Split &amp; Package</td><td>Chia <b>Train / Val / Test</b>, đóng gói sẵn dùng</td><td>Bàn giao dataset</td></tr>
+  </table>
+
+  <h2>Vòng đời một nhãn (phân biệt loại dữ liệu)</h2>
+  <div class="datapath">
+    <span class="tag raw">raw video</span> →
+    <span class="tag raw">filtered + anonymized</span> →
+    <span class="tag draft">VLM draft QA</span> →
+    <span class="tag draft">human-verified</span> →
+    <span class="tag draft">adjudicated</span> → <span style="color:#888">(qua QC κ≥0.6)</span> →
+    <span class="tag gt">FINAL GROUND TRUTH</span>
+  </div>
+
+  <h2>Vì sao thiết kế thế này?</h2>
+  <div class="callouts">
+    <div class="c blue"><b>Vì sao YOLO + VLM?</b>Auto pre-label cho <b>high recall</b>, giảm mạnh công gán tay ở bước sau.</div>
+    <div class="c purple"><b>Vì sao 2 annotators?</b>Bất đồng giữa họ = tín hiệu <b>answerability/ambiguous</b> tự nhiên, không bịa.</div>
+    <div class="c orange"><b>Vì sao Adjudicate?</b>Loại lỗi hệ thống của VLM + đảm bảo <b>hợp lệ pháp lý</b> của nhãn.</div>
+    <div class="c green"><b>Vì sao QC κ≥0.6?</b>Cổng đảm bảo bộ dữ liệu <b>đồng thuận</b> đủ cao mới được đóng gói.</div>
+  </div>
+</div>
+<script>mermaid.initialize({startOnLoad:true,theme:"base",themeVariables:{primaryColor:"#eef4fd",primaryBorderColor:"#1e5fbf",primaryTextColor:"#123f80",lineColor:"#5c6270",fontSize:"14px"}});</script>
+</body>
+</html>

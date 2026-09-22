@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System C Demo — EG-TrafficQA-VN</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<style>
+  :root{--paper:#fbf9f3;--ink:#1f2430;--blue:#1e5fbf;--green:#1f8a4c;--red:#c0392b;--orange:#e07b1a;--purple:#7b3ea8;--line:#d8d2c4;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"Segoe UI",system-ui,sans-serif;line-height:1.5;
+    background-image:linear-gradient(90deg,rgba(30,95,191,.04) 1px,transparent 1px),linear-gradient(rgba(30,95,191,.04) 1px,transparent 1px);background-size:28px 28px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 22px 60px}
+  h1{color:var(--blue);font-size:30px;margin:0 0 4px}
+  .sub{color:#5c6270;font-size:15px;margin:0 0 8px}
+  .badge{display:inline-block;background:var(--purple);color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:22px}
+  h2{color:var(--green);font-size:19px;margin:30px 0 12px;border-bottom:2px solid var(--green);display:inline-block;padding-bottom:2px}
+  .flow{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.05);margin:8px 0;overflow-x:auto}
+  .mock{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;margin-top:10px}
+  .mock .bar{background:#123f80;color:#fff;padding:8px 14px;font-size:13px;font-weight:600}
+  .mock .body{display:grid;grid-template-columns:1.3fr 1fr;gap:0}
+  @media(max-width:760px){.mock .body{grid-template-columns:1fr}}
+  .col{padding:14px 16px}
+  .col+.col{border-left:1px solid var(--line)}
+  .sec{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#8a8f9a;margin:12px 0 4px}
+  .tl{display:flex;gap:6px;margin:6px 0}
+  .kfb{flex:1;background:#eef4fd;border:1px solid #cfe0fb;border-radius:6px;text-align:center;font-size:11px;padding:6px 2px;cursor:pointer;color:#123f80}
+  .kfb.hit{background:#eaf7ef;border-color:#bfe4cc;color:#155e34;font-weight:700}
+  .row{display:flex;align-items:center;gap:8px;font-size:13.5px;margin:5px 0}
+  .conf{font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px}
+  .hi{background:rgba(31,138,76,.15);color:var(--green)} .lo{background:rgba(224,123,26,.16);color:var(--orange)}
+  .ev{font-size:11px;color:var(--blue);border:1px solid #cfe0fb;border-radius:20px;padding:1px 8px;cursor:pointer}
+  .u{background:rgba(224,123,26,.08);border-left:3px solid var(--orange);border-radius:6px;padding:7px 10px;font-size:13px;margin:4px 0}
+  .legal{background:rgba(123,62,168,.06);border:1px dashed var(--purple);border-radius:8px;padding:8px 11px;font-size:12.5px;margin-top:6px;color:#4a1f6b}
+  .warn{background:rgba(192,57,43,.06);border-left:4px solid var(--red);border-radius:8px;padding:10px 14px;font-size:14px;margin-top:16px}
+  .warn b{color:var(--red)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>⑤ System C — Demo hỗ trợ điều tra viên</h1>
+  <p class="sub">Ý C · hướng phát triển tương lai · <b>không có đóng góp nghiên cứu</b></p>
+  <span class="badge">FUTURE DEMO ONLY</span>
+
+  <h2>Sơ đồ hệ thống (draft)</h2>
+  <div class="flow">
+  <pre class="mermaid">
+flowchart TD
+    OUT["Structured output từ Method B<br/>{answer, evidence_keyframes, confidence}"] --> R1["Executive Summary<br/><small>2–3 câu high-level</small>"]
+    OUT --> R2["Timeline<br/><small>bấm-để-nhảy-tới-keyframe</small>"]
+    OUT --> R3["Entities<br/><small>thẻ + ảnh crop</small>"]
+    OUT --> R4["Cause / Violation (C,V)<br/><small>+ nút 'xem bằng chứng' + badge tin cậy</small>"]
+    OUT --> R5["Uncertainty Panel<br/><small>cái video KHÔNG kết luận được</small>"]
+    R4 --> L["Legal Retrieval (mỏng)<br/><small>gợi ý điều luật theo loại vi phạm · KHÔNG phán lỗi</small>"]
+    classDef p fill:#f3e9fb,stroke:#7b3ea8,color:#4a1f6b;
+    class L p;
+  </pre>
+  </div>
+
+  <h2>Phác thảo giao diện (mock)</h2>
+  <div class="mock">
+    <div class="bar">🚔 Accident Analysis — clip017 · demo</div>
+    <div class="body">
+      <div class="col">
+        <div class="sec">Executive summary</div>
+        <div style="font-size:13.5px">Xe xám (~40 km/h) va chạm người đi bộ băng qua đường đột ngột; tầm nhìn bị xe đỗ che khuất.</div>
+        <div class="sec">Timeline (bấm để tua keyframe)</div>
+        <div class="tl">
+          <div class="kfb">f5</div><div class="kfb hit">f9</div><div class="kfb hit">f12</div><div class="kfb hit">f14</div><div class="kfb">f16</div>
+        </div>
+        <div class="sec">Cause / Violation</div>
+        <div class="row"><span class="conf hi">cao</span> Nguyên nhân: người băng qua đột ngột + tầm nhìn bị che <span class="ev">▶ f9, f12</span></div>
+        <div class="row"><span class="conf lo">thấp</span> Vi phạm: không quan sát trước khi băng <span class="ev">▶ f9</span></div>
+        <div class="legal">⚖ Gợi ý điều luật liên quan tới "người đi bộ sang đường không quan sát" — <i>chỉ tham chiếu, không kết luận lỗi</i></div>
+      </div>
+      <div class="col">
+        <div class="sec">Entities</div>
+        <div class="row">🚗 Xe xám (gây va chạm)</div>
+        <div class="row">🚶 Người đi bộ (nạn nhân)</div>
+        <div class="row">🅿️ Xe đỗ có dashcam (che tầm nhìn)</div>
+        <div class="sec">Uncertainty panel</div>
+        <div class="u">⚠ Không xác định được người đi bộ có nhìn hai bên không (mặt bị che) → <b>Cannot be determined</b></div>
+        <div class="u">⚠ Tốc độ xe là ước lượng, không đo được chính xác</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="warn"><b>Ranh giới phạm vi:</b> lớp pháp lý <b>chỉ retrieval</b> — gợi ý điều luật liên quan tới loại vi phạm V, <b>KHÔNG adjudicate lỗi</b>. Xác định lỗi/fault nhạy cảm & thiếu ground truth → chủ ý loại khỏi nghiên cứu, chỉ để demo.</div>
+</div>
+<script>mermaid.initialize({startOnLoad:true,theme:"base",themeVariables:{fontSize:"14px",lineColor:"#5c6270"}});</script>
+</body>
+</html>

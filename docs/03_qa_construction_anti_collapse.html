@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QA Construction + Anti Modality-Collapse — EG-TrafficQA-VN</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<style>
+  :root{--paper:#fbf9f3;--ink:#1f2430;--blue:#1e5fbf;--green:#1f8a4c;--red:#c0392b;--orange:#e07b1a;--purple:#7b3ea8;--line:#d8d2c4;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"Segoe UI",system-ui,sans-serif;line-height:1.5;
+    background-image:linear-gradient(90deg,rgba(30,95,191,.04) 1px,transparent 1px),linear-gradient(rgba(30,95,191,.04) 1px,transparent 1px);background-size:28px 28px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 22px 60px}
+  h1{color:var(--blue);font-size:30px;margin:0 0 4px}
+  .sub{color:#5c6270;font-size:15px;margin:0 0 8px}
+  .badge{display:inline-block;background:var(--orange);color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.4px;margin-bottom:22px}
+  h2{color:var(--green);font-size:19px;margin:30px 0 12px;border-bottom:2px solid var(--green);display:inline-block;padding-bottom:2px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+  .panel h3{margin:0 0 8px;font-size:16px}
+  .panel.create{border-top:5px solid var(--blue)} .panel.create h3{color:var(--blue)}
+  .panel.audit{border-top:5px solid var(--red)} .panel.audit h3{color:var(--red)}
+  ul{margin:6px 0 0;padding-left:18px;font-size:14px}
+  .flow{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.05);margin:8px 0;overflow-x:auto}
+  .novelty{background:linear-gradient(90deg,rgba(224,123,26,.12),rgba(224,123,26,.03));border:1px solid var(--orange);border-radius:12px;padding:14px 18px;margin-top:18px;font-size:15px}
+  .novelty b{color:var(--orange)}
+  .metric{background:rgba(31,138,76,.07);border-left:4px solid var(--green);border-radius:8px;padding:10px 14px;font-size:14px;margin-top:12px}
+  code{background:#eef1f6;padding:1px 6px;border-radius:5px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>③ QA Construction + Chống Modality Collapse</h1>
+  <p class="sub">Đóng góp A · phần cốt lõi · chứng minh benchmark <b>thực sự video-dependent</b></p>
+  <span class="badge">★ NOVELTY 1 — MAIN CONTRIBUTION</span>
+
+  <div class="grid2">
+    <div class="panel create"><h3>Lớp 1 · Creation-side (khi tạo câu hỏi)</h3>
+      <ul>
+        <li>Distractor <b>không đoán được</b> từ language prior</li>
+        <li>Thêm option hợp lệ <code>"Cannot be determined from the video"</code>; có câu đáp án đúng chính là option này</li>
+        <li><b>Cân bằng phân phối đáp án</b> → không guess theo tần suất</li>
+        <li>Thêm câu <b>counterfactual / adversarial</b> buộc phải nhìn video</li>
+      </ul>
+    </div>
+    <div class="panel audit"><h3>Lớp 2 · Auditing-side (blind-test filter)</h3>
+      <ul>
+        <li>Chạy model <b>CÓ video</b> vs <b>KHÔNG video</b> (text-only / frame trắng)</li>
+        <li>Đúng mà <b>không cần video</b> → nhiễm language prior → <b>loại / sửa</b></li>
+        <li><b>Evidence grounding</b> cũng ép phụ thuộc thị giác</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Blind-test làm cổng kiểm định</h2>
+  <div class="flow">
+  <pre class="mermaid">
+flowchart LR
+    Q["QA candidate"] --> M1["Model + VIDEO<br/>→ acc_full"]
+    Q --> M2["Model − VIDEO<br/>text-only / blank frames<br/>→ acc_blind"]
+    M1 --> D{"Đúng khi<br/>KHÔNG cần video?"}
+    M2 --> D
+    D -- "Yes ✗ (language prior)" --> R["Loại / sửa lại câu"]
+    D -- "No ✓ (video-dependent)" --> K["Giữ vào benchmark"]
+    classDef bad fill:#fdecea,stroke:#c0392b,color:#7d241a;
+    classDef good fill:#eaf7ef,stroke:#1f8a4c,color:#155e34;
+    class R bad; class K good;
+  </pre>
+  </div>
+
+  <div class="metric"><b>Metric đặc trưng:</b> <b>Video-dependence rate</b> = Δ(acc_full − acc_blind). Δ càng lớn ⇒ benchmark càng thực sự đòi hỏi nhìn video. Đây là con số phân biệt EG-TrafficQA-VN với VRU / MM-AU.</div>
+
+  <div class="novelty">
+    <b>Phát biểu Novelty 1:</b> một <b>quy trình construction + evaluation</b> chứng minh benchmark thực sự <b>video-dependent</b>, khác với VRU/MM-AU nơi model có thể đoán đúng nhờ ngôn ngữ mà không nhìn video.
+  </div>
+</div>
+<script>mermaid.initialize({startOnLoad:true,theme:"base",themeVariables:{fontSize:"14px",lineColor:"#5c6270"}});</script>
+</body>
+</html>

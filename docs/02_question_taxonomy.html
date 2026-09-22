@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Question Taxonomy — EG-TrafficQA-VN</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<style>
+  :root{--paper:#fbf9f3;--ink:#1f2430;--blue:#1e5fbf;--green:#1f8a4c;--red:#c0392b;--orange:#e07b1a;--purple:#7b3ea8;--line:#d8d2c4;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"Segoe UI",system-ui,sans-serif;line-height:1.5;
+    background-image:linear-gradient(90deg,rgba(30,95,191,.04) 1px,transparent 1px),linear-gradient(rgba(30,95,191,.04) 1px,transparent 1px);background-size:28px 28px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 22px 60px}
+  h1{color:var(--blue);font-size:30px;margin:0 0 4px}
+  .sub{color:#5c6270;font-size:15px;margin:0 0 26px}
+  h2{color:var(--green);font-size:19px;margin:34px 0 12px;border-bottom:2px solid var(--green);display:inline-block;padding-bottom:2px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+  .card{background:#fff;border:1px solid var(--line);border-left:6px solid var(--blue);border-radius:12px;padding:14px 16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+  .card h3{margin:0 0 6px;font-size:16px;color:var(--blue)}
+  .card .ex{font-style:italic;color:#333;background:#f4f7fd;border-radius:8px;padding:7px 10px;font-size:13.5px;margin:8px 0}
+  .card ul{margin:6px 0 0;padding-left:18px;font-size:13.5px}
+  .kf{display:inline-block;background:rgba(31,138,76,.14);color:var(--green);border-radius:20px;padding:1px 9px;font-size:12px;font-weight:600}
+  .card.S{border-left-color:#555}.card.S h3{color:#555}
+  .card.E{border-left-color:var(--purple)}.card.E h3{color:var(--purple)}
+  .card.T{border-left-color:var(--blue)}
+  .card.C{border-left-color:var(--red)}.card.C h3{color:var(--red)}
+  .card.V{border-left-color:var(--orange)}.card.V h3{color:var(--orange)}
+  .ubox{background:#fff;border:2px dashed var(--purple);border-radius:14px;padding:16px 18px;margin-top:16px}
+  .ubox h3{margin:0 0 8px;color:var(--purple)}
+  .flow{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.05);margin:8px 0;overflow-x:auto}
+  .note{background:rgba(224,123,26,.08);border-left:4px solid var(--orange);border-radius:8px;padding:10px 14px;font-size:14px;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>② Question Taxonomy — S / E / T / C / V &nbsp;+&nbsp; trục U</h1>
+  <p class="sub">Từ nhu cầu điều tra → thông tin cần thu → nhóm câu hỏi · mỗi câu neo vào <span class="kf">keyframe evidence</span></p>
+
+  <h2>5 nhóm nội dung</h2>
+  <div class="cards">
+    <div class="card S"><h3>S — Scene / Context</h3>
+      <div>Khách quan hoá bối cảnh khách quan.</div>
+      <div class="ex">"What are the weather and lighting conditions?"</div>
+      <ul><li>Thu: thời tiết, ánh sáng, loại đường, mặt đường</li><li>Reasoning: perception tĩnh</li><li>Evidence: <span class="kf">1 keyframe</span></li></ul>
+    </div>
+    <div class="card E"><h3>E — Entities</h3>
+      <div>Xác định đối tượng liên quan.</div>
+      <div class="ex">"What color/type is the vehicle that caused the collision?"</div>
+      <ul><li>Thu: phương tiện/người, đặc điểm</li><li>Reasoning: recognition + grounding</li><li>Evidence: <span class="kf">1 keyframe (+bbox lite)</span></li></ul>
+    </div>
+    <div class="card T"><h3>T — Temporal / Sequence</h3>
+      <div>Dựng trình tự diễn biến.</div>
+      <div class="ex">"Did the pedestrian step onto the road before or after the gray car appeared?"</div>
+      <ul><li>Thu: thứ tự các sub-event</li><li>Reasoning: temporal ordering</li><li>Evidence: <span class="kf">2 keyframes (before/after)</span></li></ul>
+    </div>
+    <div class="card C"><h3>C — Causal</h3>
+      <div>Nguyên nhân trực tiếp.</div>
+      <div class="ex">"Which action right before the collision was the primary cause?"</div>
+      <ul><li>Thu: nguyên nhân, chuỗi nhân-quả</li><li>Reasoning: causal</li><li>Evidence: <span class="kf">1–2 keyframes (quanh trigger)</span></li></ul>
+    </div>
+    <div class="card V"><h3>V — Violation / Risk</h3>
+      <div>Tình tiết pháp lý.</div>
+      <div class="ex">"Is there any observable traffic violation (wrong lane / no observation)?"</div>
+      <ul><li>Thu: vi phạm / hành vi rủi ro</li><li>Reasoning: rule-based perception</li><li>Evidence: <span class="kf">1 keyframe (chứng minh)</span></li></ul>
+    </div>
+  </div>
+
+  <div class="ubox">
+    <h3>U — Answerability &nbsp;(KHÔNG phải nhóm thứ 6 · là TRỤC CẮT NGANG)</h3>
+    <div>Gắn lên <b>mọi</b> cặp QA — trả lời câu hỏi <i>"video có đủ căn cứ để trả lời không?"</i></div>
+    <div class="flow">
+    <pre class="mermaid">
+flowchart LR
+    Q["Mọi cặp QA (S/E/T/C/V)"] --> M1["Cơ chế 1<br/>Thêm option hợp lệ<br/>'Cannot be determined<br/>from the video'"]
+    Q --> M2["Cơ chế 2<br/>Meta-tag answerability:<br/>answerable / ambiguous /<br/>not-answerable"]
+    M2 --> D["Bất đồng 2–3 annotator<br/>= 'ambiguous' tự nhiên"]
+    classDef pp fill:#f3e9fb,stroke:#7b3ea8,color:#4a1f6b;
+    class M1,M2,D pp;
+    </pre>
+    </div>
+  </div>
+
+  <div class="note"><b>Overlap keyframe C/T/V:</b> trùng nhau quanh va chạm là <b>bình thường</b>. Chỉ cần cố ý thêm câu có evidence <b>NGOÀI</b> cửa sổ va chạm (hành vi trước 5–10s, hậu quả sau) để grounding không trivial.</div>
+</div>
+<script>mermaid.initialize({startOnLoad:true,theme:"base",themeVariables:{fontSize:"14px",lineColor:"#5c6270"}});</script>
+</body>
+</html>

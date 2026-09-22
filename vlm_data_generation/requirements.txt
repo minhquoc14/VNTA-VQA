@@ -1,0 +1,2 @@
+# VLM QA generation — Gemini API
+google-genai>=0.3

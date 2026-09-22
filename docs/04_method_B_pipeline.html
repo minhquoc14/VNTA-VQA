@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Method B Pipeline — EG-TrafficQA-VN</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+  <style>
+    :root {
+      --paper: #fbf9f3;
+      --ink: #1f2430;
+      --blue: #1e5fbf;
+      --green: #1f8a4c;
+      --red: #c0392b;
+      --orange: #e07b1a;
+      --purple: #7b3ea8;
+      --line: #d8d2c4;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      line-height: 1.5;
+      background-image: linear-gradient(90deg, rgba(30, 95, 191, .04) 1px, transparent 1px), linear-gradient(rgba(30, 95, 191, .04) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 32px 22px 60px
+    }
+
+    h1 {
+      color: var(--blue);
+      font-size: 30px;
+      margin: 0 0 4px
+    }
+
+    .sub {
+      color: #5c6270;
+      font-size: 15px;
+      margin: 0 0 8px
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--blue);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 22px
+    }
+
+    h2 {
+      color: var(--green);
+      font-size: 19px;
+      margin: 30px 0 12px;
+      border-bottom: 2px solid var(--green);
+      display: inline-block;
+      padding-bottom: 2px
+    }
+
+    .flow {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
+      margin: 8px 0;
+      overflow-x: auto
+    }
+
+    .rel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 8px
+    }
+
+    .r {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--purple);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 13.5px
+    }
+
+    .r b {
+      color: var(--purple)
+    }
+
+    .r code {
+      background: #f3e9fb;
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-size: 12.5px
+    }
+
+    .win {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 8px
+    }
+
+    @media(max-width:760px) {
+      .win {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .w {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .05)
+    }
+
+    .w h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      color: var(--green)
+    }
+
+    .w small {
+      color: #666
+    }
+
+    .risk {
+      background: rgba(192, 57, 43, .06);
+      border: 1px dashed var(--red);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-top: 16px;
+      font-size: 14px
+    }
+
+    .risk b {
+      color: var(--red)
+    }
+
+    .rule {
+      background: rgba(224, 123, 26, .08);
+      border-left: 4px solid var(--orange);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      margin-top: 14px
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>④ Method B — Evidence-Grounded Reasoning + Abstain</h1>
+    <p class="sub">Ý B · <b>đề xuất quy trình</b> (proposal, chưa phải phương pháp chính) · chạy trên benchmark A</p>
+    <span class="badge">PROPOSED PROCESS</span>
+
+    <h2>Pipeline</h2>
+    <div class="flow">
+      <pre class="mermaid">
+flowchart TD
+    V["Clip tai nạn VN"] --> S1["① Keyframe Sampling<br/><small>dày quanh vùng chuyển động/va chạm</small>"]
+    S1 --> S2["② Perception (lite)<br/><small>detect + track entity chính</small>"]
+    S2 --> S3["③ Scene Graph (lite, dynamic)<br/><small>node=entity · edge=spatial/motion/temporal/interaction</small>"]
+    S3 --> S4["④ Question-conditioned Reasoning<br/><small>truy vấn graph + nhìn lại keyframe</small>"]
+    S4 --> AB{"Đủ căn cứ?"}
+    AB -- "No" --> ABS["ABSTAIN<br/>'Cannot be determined'"]
+    AB -- "Yes" --> S5["⑤ Structured Output<br/><small>{answer, evidence_keyframes, confidence}</small>"]
+    classDef m fill:#eef4fd,stroke:#1e5fbf,color:#123f80;
+    classDef ab fill:#f3e9fb,stroke:#7b3ea8,color:#4a1f6b;
+    classDef ok fill:#eaf7ef,stroke:#1f8a4c,color:#155e34;
+    class S1,S2,S3,S4 m; class ABS ab; class S5 ok;
+  </pre>
+    </div>
+
+    <h2>Scene graph lite — 4 loại quan hệ</h2>
+    <div class="rel">
+      <div class="r"><b>Spatial</b><br /><code>người — bên phải — làn</code></div>
+      <div class="r"><b>Motion</b><br /><code>xe xám — đang tiến tới — người</code></div>
+      <div class="r"><b>Temporal</b><br /><code>[bước xuống] — trước — [va chạm]</code></div>
+      <div class="r"><b>Interaction</b><br /><code>xe xám — va chạm với — người</code></div>
+    </div>
+    <div class="rule"><b>Quy trình tạo (lite):</b> perception (detect+track) → relation extraction (prompt VLM xuất JSON
+      ~4 quan hệ/keyframe) → temporal linking (nối theo keyframe) → reason (truy vấn graph + nhìn lại keyframe).
+      <b>Scene graph là bước trung gian của METHOD, KHÔNG phải nhãn của benchmark</b> — annotator không vẽ graph.</div>
+
+    <div class="risk"><b>Rủi ro → biến thành đóng góp:</b> graph tự sinh <b>chặn trần</b> kết quả (occlusion, crash
+      nhanh). Xử lý bằng <b>ablation "có vs không scene graph"</b>: nếu giúp → finding tốt; nếu <i>không</i> giúp cho
+      crash nhanh → <b>cũng là finding có giá trị</b>. Method-centric sống được ở cả hai kết quả.</div>
+
+    <h2>Method B "thắng" baseline ở 3 trục (không chỉ accuracy)</h2>
+    <div class="win">
+      <div class="w">
+        <h3>① Grounding accuracy</h3><small>B chỉ đúng keyframe bằng chứng; baseline không chỉ được frame.</small>
+      </div>
+      <div class="w">
+        <h3>② Video-dependence</h3><small>Blind-test: acc của B rớt mạnh khi bỏ video (tốt — thật sự nhìn); baseline vẫn
+          đúng nhờ language prior (xấu).</small>
+      </div>
+      <div class="w">
+        <h3>③ Abstention</h3><small>B nói "cannot tell" đúng ở câu U; baseline bịa đáp án.</small>
+      </div>
+    </div>
+  </div>
+  <script>mermaid.initialize({ startOnLoad: true, theme: "base", themeVariables: { fontSize: "14px", lineColor: "#5c6270" } });</script>
+</body>
+
+</html>

@@ -1,0 +1,17 @@
+# Core — verified on Python 3.14.3
+streamlit>=1.62
+yt-dlp>=2026.8
+scenedetect>=0.7
+opencv-python-headless>=5.0
+numpy>=2.0
+
+# Optional: keyboard shortcuts in the review tab.
+# If it misbehaves, plain buttons work fine (CLAUDE.md Principle 2).
+# streamlit-shortcuts
+
+# Optional: real digit values from the counter (not required — the pipeline
+# only needs to know WHEN the counter changes, not what it says).
+# easyocr
+
+# Dev only (not needed to run the pipeline)
+pytest>=8
