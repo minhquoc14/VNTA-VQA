@@ -34,16 +34,16 @@ dữ liệu: output của `clip_pipeline` (`export/<batch>/*.mp4`) là input c�
 
 ## Pipeline gán nhãn end-to-end (12 bước)
 
-| Bước | Tên | Ở đâu trong repo |
+| Bước | Tên |
 |---|---|---|
-| ① | Thu thập dữ liệu (YouTube/dashcam/CCTV) | [`clip_pipeline/`](./clip_pipeline) |
-| ② | Lọc, ẩn danh (blur biển số/mặt), cắt clip 5–30s | [`clip_pipeline/`](./clip_pipeline) |
-| ③ | Sinh QA nháp bằng VLM (10 nhóm + keyframe ứng viên + answerability nháp) | [`vlm_data_generation/`](./vlm_data_generation) |
-| ④ | Checklist soạn thảo — chuẩn hoá QA nháp, chèn câu not-answerable |  |
+| ① | Thu thập dữ liệu (YouTube/dashcam/CCTV) | 
+| ② | Lọc, ẩn danh (blur biển số/mặt), cắt clip 5–30s | 
+| ③ | Sinh QA nháp bằng VLM (10 nhóm + keyframe ứng viên + answerability nháp) | 
+| ④ | Checklist soạn thảo — chuẩn hoá QA nháp, chèn câu not-answerable | 
 | ⑤ | Team A viết Guideline (rubric đúng/sai, tiêu chí keyframe & answerability) |  |
-| ⑥ | Team B Majority Vote (≥3 người/clip) | *(chưa có trong repo)* |
+| ⑥ | Team B Majority Vote (≥3 người/clip) | 
 | ⑦ | Tính Agreement Rate (% đồng thuận, keyframe IoU, answerability agreement) | |
-| ⑧ | Chốt GT (confirmed / loại bỏ / ambiguous → trục U) | *(chưa có trong repo)* |
+| ⑧ | Chốt GT (confirmed / loại bỏ / ambiguous → trục U) | 
 | ⑨ | Xây & validate LLM/VLM Judge (GEPA optimize, Spearman ≥ 0.8) |  |
 | ⑩ | Human baseline (blind vs full video) |  |
 | ⑪ | Chia Train/Val/Test + báo cáo thống kê |  |
